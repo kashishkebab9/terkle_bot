@@ -12,14 +12,27 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   tf2
   turtlesim
+  std_msgs
+  message_generation
 )
+
+add_service_files(
+  DIRECTORY srv
+  FILES
+  goal_pose.srv
+ )
+
+generate_messages()
+
 
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES ekf_slam
-#  CATKIN_DEPENDS gazebo roscpp rospy tf2 turtlesim
+  CATKIN_DEPENDS gazebo roscpp rospy tf2 turtlesim message_runtime std_msgs
 #  DEPENDS system_lib
+
 )
+
 
 include_directories(
 # include
@@ -28,4 +41,6 @@ include_directories(
 add_executable(ekf src/ekf_slam.cpp)
 target_link_libraries(ekf ${catkin_LIBRARIES})
 
+add_executable(mm src/motion_model_server.cpp)
+target_link_libraries(mm ${catkin_LIBRARIES})
 

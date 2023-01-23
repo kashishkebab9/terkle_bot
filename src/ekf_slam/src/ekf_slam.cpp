@@ -7,6 +7,7 @@
 #include "std_msgs/String.h"
 #include <sensor_msgs/LaserScan.h>
 #include <nav_msgs/Odometry.h>
+#include <geometry_msgs/Twist.h>
 
 #include <vector>
 #include <eigen3/Eigen/Dense>
@@ -21,12 +22,14 @@ class ekf {
       float y = 0.0;
       float theta = 0.0;
       pose_curr << x, y, theta;
-      calc_trigger = false;
     }
+
+    Eigen::Vector2f cmd_vel;
 
     Eigen::Vector3f pose_next;
     Eigen::Vector3f pose_curr;
     void odom_callback(const nav_msgs::Odometry msg);
+    void cmd_callback(const geometry_msgs::Twist msg);
 
   private:
 
@@ -43,20 +46,22 @@ void ekf::odom_callback(const nav_msgs::Odometry msg) {
     float linear_y =  msg.twist.twist.linear.y;
     float angular_z =  msg.twist.twist.angular.z;
 
-    Eigen::Vector3f current_velocity;
-    current_velocity << linear_x, linear_y, angular_z;
 
-    Eigen::Vector3f motion_model;
 
 }
 
+void ekf::cmd_callback(const geometry_msgs::Twist msg) { 
+  this->cmd_vel << msg.linear.x, msg.angular.z;
+
+}
 int main(int argc, char **argv)
 {
 
   ekf ekf_;
   ros::init(argc, argv, "ekf_impl");
   ros::NodeHandle n;
-  ros::Subscriber sub = n.subscribe("odom", 1, &ekf::odom_callback, &ekf_);
+  ros::Subscriber sub_odom = n.subscribe("odom", 1, &ekf::odom_callback, &ekf_);
+  ros::Subscriber sub_cmd = n.subscribe("cmd_vel", 1, &ekf::cmd_callback, &ekf_);
   ros::spin();
 
   return 0;
